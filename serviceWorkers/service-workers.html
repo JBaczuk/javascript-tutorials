@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Service Workers</title>
+  </head>
+  <body>
+    <script>
+      window.onload = async () => {
+        if ("serviceWorker" in navigator) {
+          try {
+            let sw = await navigator.serviceWorker.register("worker.js", {
+              scope: "/serviceWorkers/",
+            });
+            console.log(
+              "ServiceWorker registration successful with scope: ",
+              sw.scope
+            );
+          } catch (err) {
+            console.log("ServiceWorker registration failed: ", err);
+          }
+          navigator.serviceWorker.addEventListener("message", (event) => {
+            console.log("[Tab] received data:", event.data.foo);
+          });
+
+          navigator.serviceWorker.addEventListener("controllerchange", function (event) {
+            console.log("[Tab]: controllerchange event in progress.");
+          });
+
+        }
+
+        let btn = document.getElementsByClassName("btn");
+        btn[0].onclick = () => {
+          console.log('navigator.serviceWorker', navigator.serviceWorker)
+          if (navigator.serviceWorker.controller) {
+            navigator.serviceWorker.controller.postMessage({ foo: "bar" });
+          }
+        };
+
+        let fetchbtn = document.getElementsByClassName("fetchbtn");
+        fetchbtn[0].onclick = () => {
+          if (navigator.serviceWorker.controller) {
+            fetch("test.css").then((result) => {
+              console.log("[Tab] fetch result:", result);
+            });
+          }
+        };
+
+        let fetchbtn2 = document.getElementsByClassName("fetchbtn2");
+        fetchbtn2[0].onclick = () => {
+          if (navigator.serviceWorker.controller) {
+            fetch("https://dog-facts-api.herokuapp.com/api/v1/resources/dogs?number=1").then((result) => {
+              console.log("[Tab] fetch result:", result);
+            });
+          }
+        };
+      };
+    </script>
+
+    <button class="btn">Send Message</button>
+    <button class="fetchbtn">Fetch</button>
+    <button class="fetchbtn2">Fetch External</button>
+  </body>
+</html>
